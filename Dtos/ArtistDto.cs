@@ -10,6 +10,8 @@ namespace Dtos
     {
         public Int32   ArtistId {get; set;}
         public String   Name {get; set;}
+
+
    
     }
 }
