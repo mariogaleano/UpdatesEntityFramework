@@ -1,0 +1,168 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<script src="~/Scripts/angular.js"></script>
+<script src="~/Scripts/angular-resource.min.js"></script>
+
+
+<script type="text/javascript">
+
+    var app = angular.module('app', []);
+
+    app.controller('controlador', function ($scope, $http) {
+        $scope.tracks = [];
+
+        $scope.track = {
+            TrackId: 3527,
+            Name: "nombre",
+            MediaTypeId: 1,
+            Composer: "test composer",
+            Milliseconds: 100,
+            UnitPrice: 100
+        };
+
+
+        $scope.GuardarNormal = function () {
+
+
+
+            //console.log(track);
+
+            $http.put('http://localhost:62273/api/track', $scope.track).success(function (data, t) {
+
+                $scope.resultado = data;
+
+                console.log((data));
+
+                if (t == "200") {
+                    $scope.Mensaje = "Normal OK";
+                }
+
+            }).error(function (error) {
+
+                $scope.error = error;
+
+                console.log((error));
+
+            });
+        };
+
+        $scope.GuardarDto = function () {
+
+
+            //console.log(track);
+
+            $http.put('http://localhost:62273/api/trackdto', $scope.track).success(function (data, t) {
+
+                $scope.resultado = data;
+
+                console.log((data));
+
+                if (t == "200") {
+                    $scope.Mensaje = "Dto OK";
+                    $scope.validationErrors = [];
+                }
+
+            }).error(function (error) {
+
+                $scope.validationErrors = [];
+                if (error.ModelState && angular.isObject(error.ModelState)) {
+                    for (var key in error.ModelState) {
+                        $scope.validationErrors.push(error.ModelState[key][0]);
+                    }
+                } else {
+                    $scope.validationErrors.push('Ha ocurrido un error');
+                };
+
+                //$scope.error = error;
+
+                console.log(error);
+
+
+            });
+        };
+
+        $scope.CargarDatos = function () {
+
+            $http.get('http://localhost:62273/api/trackdto').success(function (data, t) {
+
+                $scope.tracks = data;
+
+                console.log(data.length);
+
+
+
+                if (t == "200") {
+                    $scope.Mensaje = "Carga OK";
+                }
+
+            }).error(function (error) {
+
+                $scope.error = error;
+
+                console.log((error));
+
+            });
+
+        };
+
+        $scope.Cargar = function () {
+
+            $http.get('http://localhost:62273/api/trackdto/3527').success(function (data, t) {
+
+                $scope.track = data;
+
+                if (t == "200") {
+                    $scope.Mensaje = "Carga OK";
+                }
+
+            }).error(function (error) {
+
+
+                
+                $scope.error = error;
+
+                console.log((error));
+
+            });
+
+        };
+
+    });
+
+</script>
+
+<form id="frm" class="jumbotron" ng-app="app" ng-controller="controlador">
+
+
+    <input type="text" ng-model="track.Name" />
+    <input type="text" ng-model="track.Composer" />
+    <input type="button" ng-click="Cargar()" value="Cargar" />
+
+    <div>
+        <input type="button" ng-click="GuardarNormal()" value="Guardar" />
+
+        <input type="button" ng-click="GuardarDto()" value="Guardar como Dto" />
+    </div>
+    <div>
+        <span ng-bind="error.Message"></span>
+        <span ng-bind="error.ExceptionMessage"></span>
+    </div>
+
+    <span ng-bind="Mensaje"></span>
+    
+    <div ng-show="validationErrors">
+        <ul class="list-group">
+            <li ng-repeat="error in validationErrors" class="list-group-item list-group-item-danger">{{error}}</li>
+        </ul>
+    </div> 
+
+    <input type="button" ng-click="CargarDatos()" value="Cargar datos" />
+    <select ng-options="item.Name for item in tracks" ng-model="selectedtrack"></select>
+
+    <p>
+        {{selectedtrack}}
+    </p>
+
+</form>
+
