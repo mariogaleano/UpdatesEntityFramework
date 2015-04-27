@@ -22,14 +22,24 @@ namespace Data
         public TrackDto UpdateTrack(TrackDto trackDto)
         {
             Mapper.CreateMap<TrackDto, Track>();
-            var track = Mapper.Map<TrackDto, Track>(trackDto);
-            context.Tracks.Attach(track);
 
-            var trackLocal = context.Tracks.Find(trackDto.TrackId);
-            DbEntityEntry<Track> dbEntityEntry = context.Entry(track);
-            dbEntityEntry.State = EntityState.Modified;
-            dbEntityEntry.CurrentValues.SetValues(trackDto);
-            //context.Entry(track).Property(x => x.Name).IsModified = true;
+
+            var track = context.Tracks.Find(trackDto.TrackId);
+
+            //var track = Mapper.Map<TrackDto, Track>(trackDto);
+            //context.Tracks.Attach(track);
+
+            context.Entry(track).CurrentValues.SetValues(track);
+            foreach (var property in typeof(TrackDto).GetProperties().Select(c => c.Name))
+            {
+                var original = typeof(Track).GetProperty(property).GetValue(track);
+                var current = typeof(TrackDto).GetProperty(property).GetValue(trackDto);
+                if (!object.Equals(original, current))
+                {
+                    context.Entry(track).Property(property).IsModified = true;
+                }
+            }
+           
             context.SaveChanges();
             return trackDto;
         }
